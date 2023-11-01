@@ -1,8 +1,9 @@
+import os
+
 import requests as r
 from bs4 import BeautifulSoup
 import re
 import rfeed
-from pprint import pp
 
 MAIN_PAGE = "https://sites.libsyn.com/402971"
 DOWNLOADED_FILE = 'downloaded.txt'
@@ -14,8 +15,8 @@ MY_PAGE_ADRESS = 'frog01.mikr.us:20638'
 def check_if_there_are_updates(url, downloaded_txt_file):
     podcasts_links = get_podcasts_links(url)
 
-    with open(downloaded_txt_file, 'w+') as already_downloaded:
-        all_downloaded = already_downloaded.readlines()
+    with open(downloaded_txt_file, 'r') as already_downloaded:
+        all_downloaded = already_downloaded.read().splitlines()
 
     for podcast_link in podcasts_links:
         if podcast_link in all_downloaded:
@@ -26,18 +27,18 @@ def check_if_there_are_updates(url, downloaded_txt_file):
 
 
 # !!!!!
-def check_if_already_downloaded_and_download_if_not(podcast_link, donwloaded_file):
+def check_if_already_downloaded_and_download_if_not(podcast_link, downloaded_file):
     print("checking if " + podcast_link + " needs to be downloaded")
-    with open(donwloaded_file, 'w+') as already_downloaded:
-        all_downloaded = already_downloaded.readlines()
+    with open(downloaded_file, 'r') as already_downloaded:
+        all_downloaded = already_downloaded.read().splitlines()
 
     if podcast_link in all_downloaded:
         return
     else:
         print("downloading file from link: " + podcast_link)
         download_single_podcast(podcast_link)
-        with open(donwloaded_file, 'a') as already_downloaded:
-            already_downloaded.writelines(podcast_link + '\n')
+        with open(downloaded_file, 'a') as already_downloaded:
+            already_downloaded.write(podcast_link + '\n')
 
 
 def download_single_podcast(podcast_page_url):
@@ -123,6 +124,11 @@ def create_rss_file(all_metadata, rss_filename, my_page_adress, title='Raport mi
 
 
 def main():
+
+    # check if downloaded.txt exists, if not create
+    if not os.path.exists(DOWNLOADED_FILE):
+        open(DOWNLOADED_FILE, 'w').close()
+
     if not check_if_there_are_updates(MAIN_PAGE, DOWNLOADED_FILE):
         print('Nothing to download')
         return 0
@@ -142,13 +148,3 @@ def main():
 
 main()
 
-# aa = get_podcast_metadata('https://sites.libsyn.com/402971/izrael-traci-status-ofiary-europa-na-pewno-nie-jest-bezpieczna-po-tym-co-dzieje-si-na-bliskim-wschodzie')
-# print(aa)
-
-# podcasts_links = get_podcast_links()
-# check_if_already_downloaded_and_download_if_not(podcasts_links)
-
-
-# TODO:
-# create rss file
-# update rss file
