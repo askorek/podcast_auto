@@ -8,7 +8,7 @@ MAIN_PAGE = "https://sites.libsyn.com/402971"
 DOWNLOADED_FILE = 'downloaded.txt'
 RSS_FILENAME = 'podcast.rss'
 RSS_TITLE = 'Raport Międzynarodowy'
-MY_PAGE_ADRESS =
+MY_PAGE_ADRESS = 'frog01.mikr.us:20638'
 
 def check_if_there_are_updates(url, downloaded_txt_file):
     podcasts_links = get_podcasts_links(url)
@@ -95,7 +95,7 @@ def get_podcasts_links(url):
     return podcasts_links
 
 
-def create_rss_file(all_metadata, rss_filename, title, my_page_adress):
+def create_rss_file(all_metadata, rss_filename, my_page_adress, title='Raport międzynarodowy'):
 
     _items = list()
     for metadata in all_metadata:
@@ -104,11 +104,17 @@ def create_rss_file(all_metadata, rss_filename, title, my_page_adress):
             link=metadata['podcast_link'],
             description=metadata['podcast_description'],
             guid=metadata['podcast_link'],
-            enclosure = Enclosure(url="http://www.example.com/articles/1.mp3", length=0, type='audio/mpeg')
+            enclosure=rfeed.Enclosure(url=
+                                        my_page_adress + metadata['mp3_filename'],
+                                        length=0,
+                                        type='audio/mpeg')
         )
+        _items.append(item)
 
-    feed = rfeed.Feed(title=title)
+    feed = rfeed.Feed(title=title, items=_items)
 
+    with open(rss_filename, 'w') as file:
+        file.write(feed)
 
 def main():
     if not check_if_there_are_updates(MAIN_PAGE, DOWNLOADED_FILE, MY_PAGE_ADRESS):
