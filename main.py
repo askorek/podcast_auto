@@ -10,6 +10,7 @@ RSS_FILENAME = 'podcast.rss'
 RSS_TITLE = 'Raport Międzynarodowy'
 MY_PAGE_ADRESS = 'frog01.mikr.us:20638'
 
+
 def check_if_there_are_updates(url, downloaded_txt_file):
     podcasts_links = get_podcasts_links(url)
 
@@ -22,6 +23,7 @@ def check_if_there_are_updates(url, downloaded_txt_file):
         else:
             return True
     return False
+
 
 # !!!!!
 def check_if_already_downloaded_and_download_if_not(podcast_link, donwloaded_file):
@@ -75,6 +77,7 @@ def get_podcast_metadata(podcast_link):
 
     return metadata
 
+
 def get_all_podcasts_metadata(url):
     podcasts_links = get_podcasts_links(url)
 
@@ -96,48 +99,47 @@ def get_podcasts_links(url):
 
 
 def create_rss_file(all_metadata, rss_filename, my_page_adress, title='Raport międzynarodowy'):
-
     _items = list()
     for metadata in all_metadata:
         item = rfeed.Item(
             title=metadata['podcast_title'],
             link=metadata['podcast_link'],
             description=metadata['podcast_description'],
-            guid=metadata['podcast_link'],
+            guid=rfeed.Guid(metadata['podcast_link']),
             enclosure=rfeed.Enclosure(url=
-                                        my_page_adress + metadata['mp3_filename'],
-                                        length=0,
-                                        type='audio/mpeg')
+                                      my_page_adress + '/' + metadata['mp3_filename'],
+                                      length=0,
+                                      type='audio/mpeg')
         )
         _items.append(item)
 
-    feed = rfeed.Feed(title=title, items=_items)
+    feed = rfeed.Feed(title=title, items=_items, link=my_page_adress + rss_filename,
+                      description='Raport międzynarodowy')
 
-    with open(rss_filename, 'w') as file:
-        file.write(feed)
+    with open(rss_filename, 'w', encoding="utf-8") as file:
+        file.write(feed.rss())
+
 
 def main():
-    if not check_if_there_are_updates(MAIN_PAGE, DOWNLOADED_FILE, MY_PAGE_ADRESS):
+    if not check_if_there_are_updates(MAIN_PAGE, DOWNLOADED_FILE):
         return 0
 
     all_metadata = get_all_podcasts_metadata(MAIN_PAGE)
 
-    #download missing files
+    # download missing files
     for metadata in all_metadata:
         link = metadata['podcast_link']
         check_if_already_downloaded_and_download_if_not(link, DOWNLOADED_FILE)
 
-    create_rss_file(all_metadata, RSS_FILENAME, RSS_TITLE)
+    create_rss_file(all_metadata, RSS_FILENAME, MY_PAGE_ADRESS, RSS_TITLE)
 
     pp(all_metadata)
 
 
-
-
 main()
 
-#aa = get_podcast_metadata('https://sites.libsyn.com/402971/izrael-traci-status-ofiary-europa-na-pewno-nie-jest-bezpieczna-po-tym-co-dzieje-si-na-bliskim-wschodzie')
-#print(aa)
+# aa = get_podcast_metadata('https://sites.libsyn.com/402971/izrael-traci-status-ofiary-europa-na-pewno-nie-jest-bezpieczna-po-tym-co-dzieje-si-na-bliskim-wschodzie')
+# print(aa)
 
 # podcasts_links = get_podcast_links()
 # check_if_already_downloaded_and_download_if_not(podcasts_links)
