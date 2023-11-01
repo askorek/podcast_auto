@@ -27,12 +27,14 @@ def check_if_there_are_updates(url, downloaded_txt_file):
 
 # !!!!!
 def check_if_already_downloaded_and_download_if_not(podcast_link, donwloaded_file):
+    print("checking if " + podcast_link + " needs to be downloaded")
     with open(donwloaded_file, 'w+') as already_downloaded:
         all_downloaded = already_downloaded.readlines()
 
     if podcast_link in all_downloaded:
         return
     else:
+        print("downloading file from link: " + podcast_link)
         download_single_podcast(podcast_link)
         with open(donwloaded_file, 'a') as already_downloaded:
             already_downloaded.writelines(podcast_link + '\n')
@@ -122,19 +124,21 @@ def create_rss_file(all_metadata, rss_filename, my_page_adress, title='Raport mi
 
 def main():
     if not check_if_there_are_updates(MAIN_PAGE, DOWNLOADED_FILE):
+        print('Nothing to download')
         return 0
 
     all_metadata = get_all_podcasts_metadata(MAIN_PAGE)
+    print('New data, starting downloading')
 
     # download missing files
     for metadata in all_metadata:
         link = metadata['podcast_link']
         check_if_already_downloaded_and_download_if_not(link, DOWNLOADED_FILE)
 
+    print("Download finished, creating new RSS file")
     create_rss_file(all_metadata, RSS_FILENAME, MY_PAGE_ADRESS, RSS_TITLE)
 
-    pp(all_metadata)
-
+    print("All tasks done, finishing")
 
 main()
 
